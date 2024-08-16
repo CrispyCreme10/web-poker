@@ -1,13 +1,39 @@
 "use client";
 
 import { useState } from "react";
-import FindGameBox from "./FindGameBox";
+import AddPlayerButton from "./AddPlayerButton";
+import { Player } from "../../models/Player";
+import AddPlayerBox from "./AddPlayerBox";
+import TableSettingsBox from "./TableSettingsBox";
+
+export type PlayerSpotPositionType = {
+  top?: number;
+  left?: number;
+  right?: number;
+};
 
 /**
  * Component for setting up a local game or finding multiplayer game
  */
 const Table = () => {
-  const [players, setPlayers] = useState(0);
+  const playerSpotPositions: PlayerSpotPositionType[] = [
+    { top: 65, left: 90 },
+    { top: 190, left: 30 },
+    { top: 315, left: 90 },
+    { top: 355, left: 265 },
+    { top: 355, left: 450 },
+    { top: 355, left: 635 },
+    { top: 315, right: 90 },
+    { top: 190, right: 30 },
+    { top: 65, right: 90 },
+  ];
+
+  const [players, setPlayers] = useState<(Player | undefined)[]>(
+    Array.from({ length: playerSpotPositions.length }).map(() => undefined)
+  );
+  const [playersConfirmed, setPlayersConfirmed] = useState<boolean[]>(
+    Array.from({ length: playerSpotPositions.length }).map(() => false)
+  );
 
   const TABLE_SCALE = 10;
   const width = 96 * TABLE_SCALE;
@@ -36,6 +62,20 @@ const Table = () => {
     height: height * 0.5 + "px",
   };
 
+  const showPlayerAddBox = (playerSpotPosIndex: number) => {
+    addPlayer(playerSpotPosIndex);
+  };
+
+  const addPlayer = (playerSpotPosIndex: number) => {
+    if (players[playerSpotPosIndex]) {
+      return;
+    }
+
+    const newPlayers = [...players];
+    newPlayers[playerSpotPosIndex] = new Player();
+    setPlayers(newPlayers);
+  };
+
   return (
     <div className="flex justify-center items-center w-full h-full bg-black">
       <div className="rounded-full" style={containerStyles}>
@@ -57,75 +97,22 @@ const Table = () => {
           </div>
 
           {/* ADD PLAYER SLOTS */}
-          <div className="absolute w-full h-full">
-            <div
-              className="absolute w-12 h-12 bg-slate-500 rounded-full"
-              style={{
-                top: "65px",
-                left: "90px",
-              }}
-            ></div>
-            <div
-              className="absolute w-12 h-12 bg-slate-500 rounded-full"
-              style={{
-                top: "190px",
-                left: "30px",
-              }}
-            ></div>
-            <div
-              className="absolute w-12 h-12 bg-slate-500 rounded-full"
-              style={{
-                top: "315px",
-                left: "90px",
-              }}
-            ></div>
-            <div
-              className="absolute w-12 h-12 bg-slate-500 rounded-full"
-              style={{
-                top: "355px",
-                left: "400px",
-              }}
-            ></div>
-            <div
-              className="absolute w-12 h-12 bg-slate-500 rounded-full"
-              style={{
-                top: "355px",
-                left: "450px",
-              }}
-            ></div>
-            <div
-              className="absolute w-12 h-12 bg-slate-500 rounded-full"
-              style={{
-                top: "355px",
-                left: "550px",
-              }}
-            ></div>
-            <div
-              className="absolute w-12 h-12 bg-slate-500 rounded-full"
-              style={{
-                top: "315px",
-                right: "90px",
-              }}
-            ></div>
-            <div
-              className="absolute w-12 h-12 bg-slate-500 rounded-full"
-              style={{
-                top: "190px",
-                right: "30px",
-              }}
-            ></div>
-            <div
-              className="absolute w-12 h-12 bg-slate-500 rounded-full"
-              style={{
-                top: "65px",
-                right: "90px",
-              }}
-            ></div>
+          {/* ADD PLAYER BOXES */}
+          <div className="absolute flex justify-center items-center w-full h-full">
+            {playerSpotPositions.map(
+              (playerSpotPosition, index) =>
+                !players[index] && (
+                  <AddPlayerButton
+                    key={index}
+                    playerSpotPosition={playerSpotPosition}
+                    clickHandler={() => showPlayerAddBox(index)}
+                  />
+                )
+            )}
+            <TableSettingsBox />
           </div>
         </div>
       </div>
-
-      {/* <FindGameBox /> */}
     </div>
   );
 };
